@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory Management System</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: url('Overvew.jpeg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    @keyframes slideFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 36px;
+      font-weight: bold;
+      color: #b71c1c; /* Opposite to green */
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 2px gray;
+      animation: slideFadeIn 1.2s ease-out;
+    }
+
+    .form-box, .table-box {
+      max-width: 850px;
+      margin: auto;
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    .three-images-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .three-images-row img {
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .three-images-row img:first-child,
+    .three-images-row img:last-child {
+      width: 130px;
+    }
+
+    .three-images-row img:nth-child(2) {
+      width: 180px;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 10px;
+      color: #00695c;
+    }
+
+    input, select, button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    button {
+      background: #00796b;
+      color: white;
+      font-weight: bold;
+      border: none;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #004d40;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background-color: #00695c;
+      color: white;
+      font-size: 16px;
+      padding: 12px;
+      text-align: left;
+    }
+
+    td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+
+    .edit-btn, .delete-btn {
+      padding: 6px 12px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .edit-btn {
+      background-color: #f57c00;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #d32f2f;
+      color: white;
+    }
+
+    .update-mode {
+      background-color: #388e3c !important;
+    }
+
+    button[onclick*="downloadExcel"] {
+      margin-top: 15px;
+      background-color: #FF0000;
+    }
+
+    button[onclick*="downloadExcel"]:hover {
+      background-color: #cc0000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Mandya Campus Inventory Management System</h1>
+
+  <div class="form-box">
+    <div class="three-images-row">
+      <img src="baba.jpg" alt="Baba" />
+      <img src="SSSLS Gurukulam Logo.png" alt="Logo" />
+      <img src="sadguru.jpg" alt="Sadguru" />
+    </div>
+
+    <form id="inventoryForm">
+      <label>Item Name:</label>
+      <input type="text" id="itemName" required />
+
+      <label for="category">Category</label>
+      <select id="category" name="category" required>
+        <optgroup label="🏫 Academic Block">
+          <option>Electronics</option>
+          <option>Furniture</option>
+          <option>Lab Equipment</option>
+          <option>Stationery</option>
+          <option>Library Materials</option>
+          <option>Networking</option>
+          <option>Software Licenses</option>
+          <option>Audio/Visual Aids</option>
+          <option>Cleaning Supplies</option>
+          <option>Power Backup</option>
+        </optgroup>
+        <optgroup label="🛏️ Hostel Block">
+          <option>Furniture</option>
+          <option>Bedding Items</option>
+          <option>Electrical Items</option>
+          <option>Kitchen Utensils</option>
+          <option>Water Supply Items</option>
+          <option>Toiletries Supplies</option>
+          <option>Students Basic Needs</option>
+          <option>Drama</option>
+          <option>Shoe Stand & Racks</option>
+          <option>Laundry Equipment</option>
+          <option>R3</option>
+          <option>IT Accessories</option>
+        </optgroup>
+      </select>
+
+      <label>Quantity:</label>
+      <input type="number" id="quantity" required />
+
+      <label>Location:</label>
+      <input type="text" id="location" required />
+
+      <button type="submit" id="submitBtn">➕ Add to Inventory</button>
+    </form>
+  </div>
+
+  <div class="table-box">
+    <table id="inventoryTable">
+      <thead>
+        <tr>
+          <th>Item Name</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Location</th>
+          <th>Edit</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Inventory rows here -->
+      </tbody>
+    </table>
+    <button onclick="downloadExcel()">⬇️ Download Excel</button>
+  </div>
+
+  <script>
+    const form = document.getElementById("inventoryForm");
+    const tableBody = document.querySelector("#inventoryTable tbody");
+    const submitBtn = document.getElementById("submitBtn");
+
+    let editRow = null;
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("itemName").value;
+      const category = document.getElementById("category").value;
+      const quantity = document.getElementById("quantity").value;
+      const location = document.getElementById("location").value;
+
+      if (editRow) {
+        const cells = editRow.querySelectorAll("td");
+        cells[0].innerText = name;
+        cells[1].innerText = category;
+        cells[2].innerText = quantity;
+        cells[3].innerText = location;
+        submitBtn.innerText = "➕ Add to Inventory";
+        submitBtn.classList.remove("update-mode");
+        editRow = null;
+      } else {
+        addRow(name, category, quantity, location);
+      }
+
+      form.reset();
+    });
+
+    function addRow(name, category, quantity, location) {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${name}</td>
+        <td>${category}</td>
+        <td>${quantity}</td>
+        <td>${location}</td>
+        <td><button class="edit-btn">Edit</button></td>
+        <td><button class="delete-btn">Delete</button></td>
+      `;
+
+      tableBody.appendChild(row);
+    }
+
+    tableBody.addEventListener("click", function(e) {
+      const row = e.target.closest("tr");
+
+      if (e.target.classList.contains("edit-btn")) {
+        const cells = row.querySelectorAll("td");
+        document.getElementById("itemName").value = cells[0].innerText;
+        document.getElementById("category").value = cells[1].innerText;
+        document.getElementById("quantity").value = cells[2].innerText;
+        document.getElementById("location").value = cells[3].innerText;
+
+        submitBtn.innerText = "✅ Update Inventory";
+        submitBtn.classList.add("update-mode");
+        editRow = row;
+      }
+
+      if (e.target.classList.contains("delete-btn")) {
+        row.remove();
+        if (editRow === row) {
+          form.reset();
+          submitBtn.innerText = "➕ Add to Inventory";
+          submitBtn.classList.remove("update-mode");
+          editRow = null;
+        }
+      }
+    });
+
+    function downloadExcel() {
+      const table = document.getElementById("inventoryTable");
+      const wb = XLSX.utils.table_to_book(table, {sheet: "Inventory"});
+      XLSX.writeFile(wb, "CampusInventory.xlsx");
+    }
+  </script>
+</body>
+</html>
